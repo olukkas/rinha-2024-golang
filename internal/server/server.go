@@ -43,6 +43,10 @@ func (wt *WebTransactionServer) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if err = transaction.Validate(); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+	}
+
 	result, err := wt.transactionService.CreateTransaction(client, &transaction)
 	if err != nil {
 		if errors.Is(err, services.NotEnoughBalanceErr) {

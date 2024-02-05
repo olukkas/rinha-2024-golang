@@ -21,21 +21,6 @@ type Transaction struct {
 	CreatedAt   time.Time       `json:"realizada_em"`
 }
 
-func NewTransaction(value int, Type TransactionType, description string) (*Transaction, error) {
-	transaction := Transaction{
-		Value:       value,
-		Type:        Type,
-		Description: description,
-		CreatedAt:   time.Now(),
-	}
-
-	if err := transaction.Validate(); err != nil {
-		return nil, err
-	}
-
-	return &transaction, nil
-}
-
 func (t *Transaction) Validate() error {
 	if t.Type == "" {
 		return errors.New("o tipo da transação é requerido")
