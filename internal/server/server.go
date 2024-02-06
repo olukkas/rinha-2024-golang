@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"github.com/go-chi/chi/v5"
 	"github.com/olukkas/rinha-2024-golang/internal/entities"
 	"github.com/olukkas/rinha-2024-golang/internal/services"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 type WebTransactionServer struct {
@@ -16,13 +16,19 @@ type WebTransactionServer struct {
 	clientService      *services.ClientService
 }
 
-func NewWebTransactionServer(service *services.TransactionService) *WebTransactionServer {
-	return &WebTransactionServer{transactionService: service}
+func NewWebTransactionServer(
+	transactionService *services.TransactionService,
+	clientService *services.ClientService,
+) *WebTransactionServer {
+	return &WebTransactionServer{
+		transactionService: transactionService,
+		clientService:      clientService,
+	}
 }
 
 func (wt *WebTransactionServer) Create(w http.ResponseWriter, r *http.Request) {
-	idParam := strings.Split(r.URL.Path, "/")[2]
-	clientId, _ := strconv.Atoi(idParam)
+	paramId := chi.URLParam(r, "id")
+	clientId, _ := strconv.Atoi(paramId)
 
 	client, err := wt.clientService.GetById(clientId)
 	if err != nil {
