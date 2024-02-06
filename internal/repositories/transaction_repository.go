@@ -6,7 +6,7 @@ import (
 )
 
 type TransactionRepository interface {
-	Save(transaction *entities.Transaction) (*entities.Transaction, error)
+	Save(transaction *entities.Transaction, client *entities.Client) (*entities.Transaction, error)
 	GetLastTransactions() ([]*entities.Transaction, error)
 }
 
@@ -19,21 +19,35 @@ func NewTransactionRepositoryDB(db *sql.DB) *TransactionRepositoryDB {
 }
 
 //goland:noinspection SqlNoDataSourceInspection,SqlResolve
-func (t *TransactionRepositoryDB) Save(tr *entities.Transaction) (*entities.Transaction, error) {
-	query := `
-	insert into transactions 
-    	(client_id, value, type, description, created_at) 
-	values
-        (?, ?, ?, ?, ?)
-	`
-
-	stmt, err := t.db.Prepare(query)
+func (t *TransactionRepositoryDB) Save(
+	tr *entities.Transaction,
+	client *entities.Client,
+) (*entities.Transaction, error) {
+	tx, err := t.db.Begin()
 	if err != nil {
 		return nil, err
 	}
-	defer stmt.Close()
 
-	_, err = stmt.Exec(tr.ClientID, tr.Value, tr.Type, tr.Description, tr.CreatedAt)
+	insertQuery := ` insert into transactions 
+	(client_id, value, type, description, create_at)
+	values (?, ?, ?, ?, ?) 
+	`
+
+	_, err = tx.Exec(insertQuery, tr.ClientID, tr.Value, tr.Type, tr.Description, tr.CreatedAt)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	updateClientBalance := `update clients set balance = ? where id = ?`
+
+	_, err = tx.Exec(updateClientBalance, client.Balance, client.ID)
+	if err != nil {
+		_ = tx.Rollback()
+		return nil, err
+	}
+
+	err = tx.Commit()
 	if err != nil {
 		return nil, err
 	}

@@ -1,8 +1,10 @@
 package services
 
 import (
+	"errors"
 	"github.com/olukkas/rinha-2024-golang/internal/entities"
 	"github.com/olukkas/rinha-2024-golang/internal/repositories"
+	"math"
 )
 
 type TransactionService struct {
@@ -29,12 +31,21 @@ func (t *TransactionService) CreateTransaction(
 	client *entities.Client,
 	transaction *entities.Transaction,
 ) (*CreateTransactionDto, error) {
-	_, err := t.transactionRepo.Save(transaction)
-	if err != nil {
-		return nil, err
+	var newBalance int
+
+	if transaction.Type == entities.Debit {
+		newBalance = client.Balance - transaction.Value
+
+		if math.Abs(float64(newBalance)) > float64(client.Balance) {
+			return nil, errors.New("")
+		}
+	} else {
+		newBalance = client.Balance + transaction.Value
 	}
 
-	err = t.clientService.UpdateBalance(client, transaction.Value, transaction.Type)
+	client.Balance = newBalance
+
+	_, err := t.transactionRepo.Save(transaction, client)
 	if err != nil {
 		return nil, err
 	}

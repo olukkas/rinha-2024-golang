@@ -6,7 +6,6 @@ import (
 )
 
 type ClientRepository interface {
-	UpdateBalance(id, balance int) error
 	GetById(id int) (*entities.Client, error)
 }
 
@@ -30,22 +29,4 @@ func (c *ClientRepositoryDB) GetById(id int) (*entities.Client, error) {
 	}
 
 	return &client, nil
-}
-
-//goland:noinspection SqlNoDataSourceInspection,SqlResolve
-func (c *ClientRepositoryDB) UpdateBalance(id, balance int) error {
-	query := `update clients set balance = ? where id = ?`
-
-	stmt, err := c.db.Prepare(query)
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	_, err = stmt.Exec(id, balance)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

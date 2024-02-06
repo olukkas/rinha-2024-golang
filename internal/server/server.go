@@ -9,6 +9,7 @@ import (
 	"github.com/olukkas/rinha-2024-golang/internal/services"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 type WebTransactionServer struct {
@@ -48,6 +49,8 @@ func (wt *WebTransactionServer) Create(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+
+	transaction.CreatedAt = time.Now()
 
 	if err = transaction.Validate(); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
