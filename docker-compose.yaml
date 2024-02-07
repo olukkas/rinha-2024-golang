@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    environment:
+      - PORT=8080
+      - DNS_DB="dbname=rinha sslmode=disable user=postgres password=root host=postgres"
+    ports:
+      - "8080:8080"
+
+  postgres:
+    image: postgres:9.4
+    restart: always
+    tty: true
+    volumes:
+      - .docker/pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=rinha
+    ports:
+      - "5432:5432"
