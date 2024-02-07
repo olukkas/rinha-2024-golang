@@ -32,6 +32,11 @@ func main() {
 	}
 	defer db.Close()
 
+	err = db.Ping()
+	if err != nil {
+		log.Fatalf("ping error %s", err)
+	}
+
 	clientRepo := repositories.NewClientRepositoryDB(db)
 	transactionRepo := repositories.NewTransactionRepositoryDB(db)
 
@@ -42,7 +47,7 @@ func main() {
 
 	c := chi.NewRouter()
 	c.Use(middleware.Logger)
-	c.Get("/clientes/{id}/transacoes", web.Create)
+	c.Post("/clientes/{id}/transacoes", web.Create)
 
 	fmt.Println("listening on port:", port)
 	log.Fatal(http.ListenAndServe(":"+port, c))

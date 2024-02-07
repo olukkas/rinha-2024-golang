@@ -5,9 +5,11 @@ services:
     build: .
     environment:
       - PORT=8080
-      - DNS_DB="dbname=rinha sslmode=disable user=postgres password=root host=postgres"
+      - DNS_DB=dbname=rinha sslmode=disable user=postgres password=root host=postgres
     ports:
       - "8080:8080"
+    depends_on:
+      - postgres
 
   postgres:
     image: postgres:9.4
