@@ -10,6 +10,7 @@ import (
 	"github.com/olukkas/rinha-2024-golang/internal/server"
 	"github.com/olukkas/rinha-2024-golang/internal/services"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 )
@@ -17,12 +18,12 @@ import (
 func main() {
 	dns := os.Getenv("DNS_DB")
 	if dns == "" {
-		dns = "dbname=rinha sslmode=disable user=postgres password=root host=localhost"
+		slog.Error("could not find DNS_DB env variable")
 	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		slog.Error("could not find PORT env variable")
 	}
 
 	db, err := sql.Open("postgres", dns)
