@@ -5,7 +5,7 @@ services:
     build: .
     environment:
       - PORT=8080
-      - DNS_DB=my_dns
+      - DNS_DB="dbname=rinha sslmode=disable user=postgres password=root host=postgres"
     ports:
       - "8080:8080"
 

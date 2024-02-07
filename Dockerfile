@@ -8,7 +8,7 @@ RUN go mod download
 
 COPY . .
 
-RUN CGO_ENABLED=O GOOS=linux go build -a -installsufix nocgo -o myapp cmd/api/main.go .
+RUN CGO_ENABLED=O GOOS=linux go build -o myapp ./cmd/api/main.go
 
 FROM scratch
 
