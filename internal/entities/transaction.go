@@ -17,7 +17,7 @@ type Transaction struct {
 	ClientID    int             `json:"client_id"`
 	Value       int             `json:"valor"`
 	Type        TransactionType `json:"tipo"`
-	Description string          `json:"descrição"`
+	Description string          `json:"descricao"`
 	CreatedAt   time.Time       `json:"realizada_em"`
 }
 
@@ -38,8 +38,12 @@ func (t *Transaction) Validate() error {
 		return errors.New("o campo descrição deve conter entre 1 e 10 caracteres apenas")
 	}
 
-	if t.Value >= 0 {
+	if t.Value <= 0 {
 		return errors.New("o valor para a transação deve ser maior do que 0")
+	}
+
+	if t.ClientID == 0 {
+		return errors.New("a transação precisa está associada a um cliente")
 	}
 
 	return nil
