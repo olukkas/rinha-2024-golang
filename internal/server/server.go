@@ -51,9 +51,11 @@ func (wt *WebTransactionServer) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	transaction.CreatedAt = time.Now()
+	transaction.ClientID = client.ID
 
 	if err = transaction.Validate(); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
 	}
 
 	result, err := wt.transactionService.CreateTransaction(client, &transaction)
