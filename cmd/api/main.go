@@ -10,7 +10,6 @@ import (
 	"github.com/olukkas/rinha-2024-golang/internal/server"
 	"github.com/olukkas/rinha-2024-golang/internal/services"
 	"log"
-	"log/slog"
 	"net/http"
 	"os"
 )
@@ -18,12 +17,12 @@ import (
 func main() {
 	dns := os.Getenv("DNS_DB")
 	if dns == "" {
-		slog.Error("could not find DNS_DB env variable")
+		log.Fatalf("could not find DNS_DB env variable")
 	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		slog.Error("could not find PORT env variable")
+		log.Fatalf("could not find PORT env variable")
 	}
 
 	db, err := sql.Open("postgres", dns)
@@ -48,6 +47,7 @@ func main() {
 	c := chi.NewRouter()
 	c.Use(middleware.Logger)
 	c.Post("/clientes/{id}/transacoes", web.Create)
+	c.Get("/clientes/{id}/extrato", web.Statement)
 
 	fmt.Println("listening on port:", port)
 	log.Fatal(http.ListenAndServe(":"+port, c))
