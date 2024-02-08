@@ -54,7 +54,7 @@ func (t *TransactionService) CreateTransaction(
 func (t *TransactionService) GetStatement(client *entities.Client) (*GetStatementDto, error) {
 	var transactions []TransactionDto
 
-	lastTransactions, err := t.transactionRepo.GetLastTransactions()
+	lastTransactions, err := t.transactionRepo.GetLastTransactions(client.ID)
 	if err != nil {
 		return nil, err
 	}

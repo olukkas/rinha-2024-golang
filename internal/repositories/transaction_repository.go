@@ -7,7 +7,7 @@ import (
 
 type TransactionRepository interface {
 	Save(transaction *entities.Transaction, client *entities.Client) (*entities.Transaction, error)
-	GetLastTransactions() ([]*entities.Transaction, error)
+	GetLastTransactions(id int) ([]*entities.Transaction, error)
 }
 
 type TransactionRepositoryDB struct {
@@ -54,17 +54,18 @@ func (t *TransactionRepositoryDB) Save(
 }
 
 //goland:noinspection SqlNoDataSourceInspection,SqlResolve
-func (t *TransactionRepositoryDB) GetLastTransactions() ([]*entities.Transaction, error) {
+func (t *TransactionRepositoryDB) GetLastTransactions(id int) ([]*entities.Transaction, error) {
 	var transactions []*entities.Transaction
 
 	query := `
 	select id, client_id, value, type, description, created_at
 	from transactions
-	order by created_at
+	where client_id = $1
+	order by created_at desc
 	limit 10
 	`
 
-	rows, err := t.db.Query(query)
+	rows, err := t.db.Query(query, id)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +74,7 @@ func (t *TransactionRepositoryDB) GetLastTransactions() ([]*entities.Transaction
 	for rows.Next() {
 		tr := new(entities.Transaction)
 
-		err := rows.Scan(&tr.ID, &tr.ClientID, &tr.Value, &tr.Description, &tr.CreatedAt)
+		err := rows.Scan(&tr.ID, &tr.ClientID, &tr.Value, &tr.Type, &tr.Description, &tr.CreatedAt)
 		if err != nil {
 			return nil, err
 		}

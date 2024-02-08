@@ -72,6 +72,30 @@ func (wt *WebTransactionServer) Create(w http.ResponseWriter, r *http.Request) {
 	respondOk(w, result)
 }
 
+func (wt *WebTransactionServer) Statement(w http.ResponseWriter, r *http.Request) {
+	paramId := chi.URLParam(r, "id")
+	clientId, _ := strconv.Atoi(paramId)
+
+	client, err := wt.clientService.GetById(clientId)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	result, err := wt.transactionService.GetStatement(client)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	respondOk(w, result)
+}
+
 func respondOk(w http.ResponseWriter, result any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
