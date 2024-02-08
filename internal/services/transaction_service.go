@@ -1,10 +1,10 @@
 package services
 
 import (
-	"errors"
 	"github.com/olukkas/rinha-2024-golang/internal/entities"
 	"github.com/olukkas/rinha-2024-golang/internal/repositories"
 	"math"
+	"time"
 )
 
 type TransactionService struct {
@@ -22,11 +22,6 @@ func NewTransactionService(
 	}
 }
 
-type CreateTransactionDto struct {
-	Limit   int `json:"limite"`
-	Balance int `json:"saldo"`
-}
-
 func (t *TransactionService) CreateTransaction(
 	client *entities.Client,
 	transaction *entities.Transaction,
@@ -37,7 +32,7 @@ func (t *TransactionService) CreateTransaction(
 		newBalance = client.Balance - transaction.Value
 
 		if math.Abs(float64(newBalance)) > float64(client.Balance) {
-			return nil, errors.New("")
+			return nil, NotEnoughBalanceErr
 		}
 	} else {
 		newBalance = client.Balance + transaction.Value
@@ -53,5 +48,36 @@ func (t *TransactionService) CreateTransaction(
 	return &CreateTransactionDto{
 		Limit:   client.Limit,
 		Balance: client.Balance,
+	}, nil
+}
+
+func (t *TransactionService) GetStatement(client *entities.Client) (*GetStatementDto, error) {
+	var transactions []TransactionDto
+
+	lastTransactions, err := t.transactionRepo.GetLastTransactions()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, last := range lastTransactions {
+		transaction := TransactionDto{
+			Value:       last.Value,
+			Type:        string(last.Type),
+			Description: last.Description,
+			CreatedAt:   last.CreatedAt,
+		}
+
+		transactions = append(transactions, transaction)
+	}
+
+	balance := BalanceDto{
+		Total: client.Balance,
+		Limit: client.Limit,
+		Date:  time.Now(),
+	}
+
+	return &GetStatementDto{
+		Balance:          balance,
+		LastTransactions: transactions,
 	}, nil
 }
