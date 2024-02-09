@@ -31,11 +31,6 @@ func main() {
 	}
 	defer db.Close()
 
-	err = db.Ping()
-	if err != nil {
-		log.Fatalf("ping error %s", err)
-	}
-
 	clientRepo := repositories.NewClientRepositoryDB(db)
 	transactionRepo := repositories.NewTransactionRepositoryDB(db)
 
